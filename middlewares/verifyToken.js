@@ -25,11 +25,12 @@ const verifyToken = (req, res, next) => {
   }
 
   //verify the token
-  const { userId } = jwt.verify(token, process.env.JWT_SECRET);
+  const { userId, userRole } = jwt.verify(token, process.env.JWT_SECRET);
   //   console.log(userId);
 
   // add userId property to the request object
   req.userId = userId;
+  req.userRole = userRole;
 
   next();
 };

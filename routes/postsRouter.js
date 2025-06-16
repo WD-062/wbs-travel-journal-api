@@ -11,7 +11,7 @@ postsRouter.route('/').get(getAllPosts).post(verifyToken, validateZod(postSchema
 postsRouter
   .route('/:id')
   .get(getSinglePost)
-  .put(verifyToken, validateZod(postSchema), updatePost)
+  .put(verifyToken, validateZod(postSchema.omit({ author: true })), updatePost)
   .delete(verifyToken, deletePost);
 
 export default postsRouter;

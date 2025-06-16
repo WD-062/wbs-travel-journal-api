@@ -25,7 +25,7 @@ const signup = async (req, res) => {
 
   const user = await User.create({ ...req.sanitizedBody, password: hashedPassword });
 
-  const payload = { userId: user._id }; // The data we want to enclose in the JWT
+  const payload = { userId: user._id, userRole: user.role || 'user' }; // The data we want to enclose in the JWT
 
   const token = jwt.sign(payload, secret, tokenOptions);
 
@@ -44,7 +44,7 @@ const signin = async (req, res) => {
 
   if (!passwordMatch) throw new Error('Invalid email or password', { cause: 401 });
 
-  const payload = { userId: user._id };
+  const payload = { userId: user._id, userRole: user.role || 'user' };
 
   const token = jwt.sign(payload, secret, tokenOptions);
 

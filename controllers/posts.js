@@ -24,21 +24,54 @@ export const getSinglePost = async (req, res) => {
 
 export const updatePost = async (req, res) => {
   const {
-    sanitizedBody,
-    params: { id }
+    // destructure the properties we want to update
+    sanitizedBody: { image, title, content },
+    params: { id },
+    // destructure userId from verifyToken
+    userId,
+    userRole
   } = req;
+
   if (!isValidObjectId(id)) throw new Error('Invalid id', { cause: 400 });
-  const updatedPost = await Post.findByIdAndUpdate(id, sanitizedBody, { new: true }).populate('author');
-  if (!updatedPost) throw new Error(`Post with id of ${id} doesn't exist`, { cause: 404 });
-  res.json(updatedPost);
+
+  // get the post, but not update
+  const postInDatabase = await Post.findById(id);
+
+  if (!postInDatabase) throw new Error(`Post with id of ${id} doesn't exist`, { cause: 404 });
+
+  // if signed in userId doesn't equal author id throw an error
+  if (userId !== postInDatabase.author.toString() && userRole !== 'admin')
+    throw new Error('Not authorized', { cause: 403 });
+
+  // update the values in the post
+  postInDatabase.title = title;
+  postInDatabase.image = image;
+  postInDatabase.content = content;
+
+  // we save the changes
+  await postInDatabase.save();
+
+  res.json(postInDatabase);
 };
 
 export const deletePost = async (req, res) => {
   const {
-    params: { id }
+    params: { id },
+    userId,
+    userRole
   } = req;
   if (!isValidObjectId(id)) throw new Error('Invalid id', { cause: 400 });
-  const deletedPost = await Post.findByIdAndDelete(id).populate('author');
-  if (!deletedPost) throw new Error(`Post with id of ${id} doesn't exist`, { cause: 404 });
+
+  // get the post, but not update
+  const postInDatabase = await Post.findById(id);
+
+  if (!postInDatabase) throw new Error(`Post with id of ${id} doesn't exist`, { cause: 404 });
+
+  // if signed in userId doesn't equal author id throw an error
+  if (userId !== postInDatabase.author.toString() && userRole !== 'admin')
+    throw new Error('Not authorized', { cause: 403 });
+
+  await Post.findByIdAndDelete(id);
+
   res.json({ success: `Post with id of ${id} was deleted` });
 };
