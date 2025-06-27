@@ -11,7 +11,7 @@ export const userSchema = z.object({
   lastName: z.string().min(1),
   email: z.string(),
   password: z.string().min(8).max(12),
-  role: z.enum(['admin', 'user']).default('user')
+  role: z.enum(['admin', 'user', 'partner', 'staff']).default('user')
 });
 
 export const signInSchema = userSchema.omit({ firstName: true, lastName: true });
